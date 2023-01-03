@@ -1,8 +1,10 @@
 package es.database.health;
 
+import java.io.File;
 import java.util.ArrayList;
 
-import es.exercise.health.Exercise;
+import com.google.gson.Gson;
+
 import es.user.health.User;
 
 public class DataBase implements IShow {
@@ -20,7 +22,14 @@ public class DataBase implements IShow {
 	private static final String USEREXISTS 	  = "There is no user with this combination\n";
 	
 	private static ArrayList <User> listUser = new ArrayList <User>();
-		
+	
+	
+	
+	
+	
+	
+	
+	
 	// ADD USER
 	public static void addUser(User user) {
 		
@@ -35,9 +44,11 @@ public class DataBase implements IShow {
 	
 	// REMOVE USER
 	public static void removeUser(User user) {
-			
-		listUser.remove(user);
-			
+		
+		if(aliasExists(user.getAlias()) != null) { 
+			listUser.remove(user);
+		}
+				
 	}
 	
 	// ALIAS EXIST
@@ -99,20 +110,17 @@ public class DataBase implements IShow {
 			System.out.println(SEX	     + u.getSex()); // SEX
 			System.out.println(WEIGHT	 + u.getWeight()); // SEX
 			
-			
-			
-			
 			System.out.println(SEPARATOR);
 		
 		}
 	}
 
 	public String ShowInformation() {
-		
-		String str = "";
-		str += " ";
+		// TODO Auto-generated method stub
 		return null;
 	}
+
+	
 
 	
 }

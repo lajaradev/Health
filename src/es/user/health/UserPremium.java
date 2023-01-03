@@ -3,11 +3,12 @@ package es.user.health;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+import es.database.health.IShow;
 import es.user.health.UserPremium.Duration;
 
 public class UserPremium extends User {
 	
-	private static final String SPACE           = "";
+	private static final String SP              = "-----------------------";
 	private static final String VALIDPASSWORD   = "Valid Password";
 	private static final String NOTCONTAIN  	= "Your password does not contain the following: ";
 	private static final String MINLOWERCASE  	= "Minimum lowercase letters (1)";
@@ -16,7 +17,7 @@ public class UserPremium extends User {
 	private static final String MINSPECIAL   	= "Minium special characters (1)";
 	private static final String PASSWORDMIN   	= "Atleast 8 Characters";
 	
-	
+	private String passwordPremium;
 	private LocalDateTime DatePremiumRegistration;
 	
 	private Duration duration;
@@ -25,12 +26,28 @@ public class UserPremium extends User {
 		MONTHLY, ANNUAL, INDEFINITE // list of named constants that define a new data type
 	}
 	
-	public UserPremium(User user, LocalDateTime DatePremiumRegistration, Duration duration) {
+	public UserPremium() {
+		super();
+	}
+
+	public UserPremium(User user, String passwordPremium, LocalDateTime DatePremiumRegistration, Duration duration) {
 		
-		super(user.getAlias(), user.getPassword(), user.getName(), user.getLastName(), user.getBirthdayDate(), user.getSex(), user.getWeight(), user.getHeight(), user.getActivity());
+		super(user.getAlias(), user.getPassword(), user.getName(), user.getLastName(), user.getBirthdayDate(), user.getAge(), user.getSex(), user.getWeight(), user.getHeight(), user.getActivity());
+		this.passwordPremium = passwordPremium;
+		user.setPassword(passwordPremium);
 		this.DatePremiumRegistration = DatePremiumRegistration;
 		this.duration = duration;
 		
+	}
+	
+	public String ShowInformation() {
+		
+		String informationUser = super.ShowInformation();
+		informationUser += SP;
+		informationUser += DatePremiumRegistration.toString()  ;
+		informationUser += duration ;
+		
+		return informationUser;
 	}
 	
 	public static Duration validateDuration(String strDuration) {
@@ -137,17 +154,21 @@ public class UserPremium extends User {
 	public void setDatePremiumRegistration(LocalDateTime datePremiumRegistration) {
 		DatePremiumRegistration = datePremiumRegistration;
 	}
-
 	
-	private Duration getDuration() {
+	public Duration getDuration() {
 		return duration;
 	}
 
-	private void setDuration(Duration duration) {
+	public void setDuration(Duration duration) {
 		this.duration = duration;
 	}
 
-	
+	public String getPasswordPremium() {
+		return passwordPremium;
+	}
 
+	public void setPasswordPremium(String passwordPremium) {
+		this.passwordPremium = passwordPremium;
+	}
 
 }

@@ -1,5 +1,6 @@
 package es.main.health;
 
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -10,20 +11,21 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import es.database.health.DataBase;
+import es.database.health.DataBaseGson;
 import es.exercise.health.Exercise;
 import es.user.health.User;
 import es.user.health.User.ActivityFactor;
 import es.user.health.UserPremium;
 import es.user.health.UserPremium.Duration;
+import es.user.health.Weight;
 
 public class Main {
 	
 	private static final String HEALTHAPP 	  = "HEALTH APP BY SAMUEL LAJARA";
 	private static final String SEPARATOR     = "-------------------------------\n";
-	
+	private static final String NAMEFILE  	  = "Users.txt";
 	private static final String MAINMENU      = "1. Sign in\n2. Log in\n3. Exit";
 	private static final String USERMENU      = "1. Conversion to Premium\n2. Change of Password\n3. Enter Wight\n4. Activity Register\n5. Show Report\n6. Generate PDF Report\n7. Exit";
-
 	private static final String ALIAS 		  = "Alias:";
 	private static final String PASSWORD      = "Password:";
 	private static final String OLDPASSWORD   = "Old Password:";
@@ -41,26 +43,37 @@ public class Main {
 	private static final String WEIGHT 		  = "Weight:";
 	private static final String HEIGHT 		  = "Height:";
 	private static final String ACTIVITY 	  = "ACTIVITY:\n 'S' -> SEDENTARY, 'L' -> LIGHT, 'M' -> MODERATE, 'I' -> INTENSE, 'E' -> EXTREMELYHIGH";
-	
 	private static final String DEFAULT       = "Wrong Number";
 	private static final String SPACE         = "";
 	private static final String PASSWORDMIN   = "Atleast 6 Characters";
 	private static final String NOTNULL  	  = "Not Null";
 	private static final String CHECKNUMBER   = "You haven't entered a number. Try again: ";
 	private static final String ERRORDATE2	  = "The date can't be later than the current date";
-	
-	private static final String EXERCISEMENU  = "1. Generic Exercise\n2. Running\n3. Cycling\n4. Swimming\n";
-	private static final String STARTDATE	  = "Start Date: ";
-	private static final String ENDDATE	 	  = "End Date: ";
+	private static final String EXERCISEMENU  = "1. Generic Exercise\n2. Running\n3. Cycling\n4. Swimming\n5. Return\n";
+	private static final String STARTDATE	  = "Start Date -> HH:mm";
+	private static final String ENDDATE	 	  = "End Date -> HH:mm";
 	private static final String DATAFORMAT	  = "yyyy/mm/dd";
+	private static final String HHFORMAT	  = "HH:mm";
 	private static final String AGE	 		  = "Age: ";
+	private static final String NEWWEIGHT	  = "New Weight: ";
+	private static final String DISTANCE 	  = "\nDistance: ";
+	private static final String DUR			  = "Duration: M / A / I";
+	private static final String FCMAX	 	  = "\nFC MAX: ";
+	private static final String FCMED 		  = "\nFC MED: ";
+	private static final String FCMIN 		  = "\nFC MIN: ";
 	
 	private static Scanner scanIn = new Scanner(System.in);
+	private static ArrayList <User> listUser = new ArrayList <User>();
 	
 	public static void main(String[] args) {
 				
 		System.out.println(HEALTHAPP);
 		System.out.println(SEPARATOR);
+		
+		File f = new File(NAMEFILE);
+		if(f.exists()) {
+			
+		}
 		
 		menu();
 		
@@ -103,6 +116,7 @@ public class Main {
 					System.out.println(DEFAULT);
 				break;
 				} // SWITCH END	
+				DataBaseGson.writeUsers(listUser);
 			
 		}while(b);
 		
@@ -127,45 +141,44 @@ public class Main {
 												
 				switch(option) {
 				
-				case 1: // CONVERSION TO PREMIUM
-					System.out.println("Op 1");
-					premiumConversion(user);
-				break;
+					case 1: // CONVERSION TO PREMIUM
+						premiumConversion(user);
+					break;
+						
+					case 2: // CHANGE OF PASSWORD
+						changePassword(user);
+					break;
+						
+					case 3: // ENTER WEIGHT 
+						enterWeight(user);
+					break;
 					
-				case 2: // CHANGE OF PASSWORD
-					System.out.println("Op 2");
-					changePassword(user);
-				break;
+					case 4: // EXERCISE REGISTER
+						exerciseRegister(user);
+					break;
 					
-				case 3: // ENTER WEIGHT 
-					System.out.println("Op 3");
-				break;
-				
-				case 4: // EXERCISE REGISTER
-					exerciseRegister(user);
-				break;
-				
-				case 5: // SHOW REPORT
-					System.out.println("op 5");
-					//ShowInformation();
-				break;
-				
-				case 6: // GENERATE PDF REPORT
-					System.out.println("Op 6");
-				break;
-				
-				case 7: // EXIT
-					System.out.println("Op 7");
-				break;
-				
-				case 8: // TESTS
-					DataBase.showUser(listUser);
-				break;
+					case 5: // SHOW REPORT
+						System.out.println(user.ShowInformation());
+						//ShowInformation();
+					break;
 					
-				default:
-					System.out.println(DEFAULT);
-				break;
+					case 6: // GENERATE PDF REPORT
+						System.out.println("Op 6");
+					break;
+					
+					case 7: // EXIT
+						b = false;
+					break;
+					
+					case 8: // TESTS
+						DataBase.showUser(listUser);
+					break;
+						
+					default:
+						System.out.println(DEFAULT);
+					break;
 				} // SWITCH END	
+				DataBaseGson.writeUsers(listUser);
 			
 		}while(b);
 
@@ -205,9 +218,11 @@ public class Main {
 		user.setName(strName);				  // NAME
 		user.setLastName(strLastName);		  // LAST NAME
 		user.setBirthdayDate(strBirthday);	  // BIRTHDAY DATE
+		user.setAge(intAge);                  // AGE
 		user.setSex(strSex);				  // SEX
 		user.setWeight(intWeight);			  // WEIGHT
 		user.setHeight(intHeight);			  // HEIGHT
+		user.setImc();   					  // IMC
 		user.setActivity(actActivity);        // ACTIVITYFACTOR
 		DataBase.addUser(user);	
 		 
@@ -216,7 +231,6 @@ public class Main {
 	private static int calculateAge(String strBirthday) {
 		
 		int age = 0;
-		Calendar birthday;
 		
 		Date date = new Date();
 		Calendar calendar = Calendar.getInstance();
@@ -430,8 +444,6 @@ public class Main {
 		return null;
 	}
 	
-	
-
 	private static void premiumConversion(User user){
 		
 		String strPasswordPremium, strDuration;
@@ -446,10 +458,9 @@ public class Main {
 			
 		} while(ok == false);
 		
-		
 		do {
 			
-			strDuration = screen("Duration: M / A / I");
+			strDuration = screen(DUR);
 			durDuration = UserPremium.validateDuration(strDuration);
 		
 		} while(durDuration == null);
@@ -457,27 +468,26 @@ public class Main {
 		intDuration = UserPremium.validateDayDuration(durDuration);
 		
 		LocalDateTime Todaysdate = LocalDateTime.now();     		// Today
-	    LocalDateTime newDate = Todaysdate.plusDays(intDuration);   // Plus day
+	    Todaysdate = Todaysdate.plusDays(intDuration);   // Plus day
 		
 	    //System.out.println(newDate);
-	    
-	    user = new UserPremium(user, Todaysdate, durDuration);
-	   // DataBase.removeUser(user);
-	    DataBase.addUser(user);
+	  
+	    UserPremium userP = new UserPremium(user, strPasswordPremium, Todaysdate, durDuration);
+	    DataBase.removeUser(user);
+	    DataBase.addUser(userP);
 	    
 	}
 	
 	private static void changePassword(User user){
 		
-		String oldPassword, newPassword, strAlias = user.getAlias(), strPassword = user.getPassword();
-		
+		String oldPassword, newPassword, strAlias = user.getAlias();
 		
 		oldPassword = screen(OLDPASSWORD);
 		
-		if(DataBase.passwordOld(strAlias, strPassword) == true) {
+		if(DataBase.passwordOld(strAlias, oldPassword) == true) {
 			
 			newPassword = screen(NEWPASSWORD);
-			// TO DO PREMIUM OR NOT ??? VALIDATE TYPE
+			
 			user.setPassword(newPassword);
 			System.out.println(PASSWORDOK);
 			
@@ -507,7 +517,7 @@ public class Main {
 				break;
 					
 				case 2: // RUNNING
-				
+					running(user);
 				break;
 					
 				case 3: // CYCLING
@@ -516,6 +526,10 @@ public class Main {
 				
 				case 4: // SWIMMING
 					
+				break;
+				
+				case 5: // RETURN
+					b = false;
 				break;
 									
 				default:
@@ -529,40 +543,64 @@ public class Main {
 	
 	private static void genericExercise(User user) {
 		
-		Date dateStart = null;
-		Date dateEnd = null;
-		long dateDuration;
-		int intDistance, intKCalConsumed, intFcMax, intFcMed, intFcMin;
+		Date startTime = null;
+		Date endTime = null;
+		Date durationTime;
+		int intDistance, intFcMax, intFcMin;
 		
 		try {
-			dateStart = new SimpleDateFormat("MM/dd/yyyy").parse(screen(STARTDATE));
+			startTime = new SimpleDateFormat(HHFORMAT).parse(screen(STARTDATE));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 		
 		try {
-			dateEnd = new SimpleDateFormat("MM/dd/yyyy").parse(screen(ENDDATE));
+			endTime = new SimpleDateFormat(HHFORMAT).parse(screen(ENDDATE));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+		//System.out.println(startTime);
+		//System.out.println(dateEnd);
 		
-		dateDuration = dateEnd.getTime() - dateStart.getTime();
-		intDistance = Integer.parseInt(screen("Distance: "));
-		intFcMax = Integer.parseInt(screen("FcMax: "));
-		intFcMin = Integer.parseInt(screen("FcMin: "));
-		
+		durationTime = new Date (endTime.getTime() - startTime.getTime() - 3600000);
+		intDistance = Integer.parseInt(screen(DISTANCE));
+		intFcMax = Integer.parseInt(screen(FCMAX));
+		intFcMin = Integer.parseInt(screen(FCMIN));
+		//System.out.println(durationTime);
 		Exercise exercise = new Exercise();
-		exercise.setStartDate(dateStart);
-		exercise.setStartDate(dateEnd);
-		exercise.setDuration(dateDuration);
+		exercise.setStartTime(startTime);
+		exercise.setEndTime(endTime);
+		exercise.setDuration(durationTime);
 		exercise.setDistance(intDistance);
 		exercise.setFcMax(intFcMax);
 		exercise.setFcMin(intFcMin);
-		//TO DO
-		//exercise.setkCalConsumed(user.getSex(), user.getAge(), user.getWeight());
-		//exercise.setFcMed();
-		user.listExercise.add(exercise);
+		exercise.setkCalConsumed(user.getSex(), user.getAge(), user.getWeight());
+		exercise.setFcMed();
+		user.addExercise(exercise);	
 		
 	}
 	
+	private static void running(User user) {
+		
+		genericExercise(user);
+		
+			
+			
+	}
+	
+	private static void enterWeight(User user) {
+		
+		int newWeight;
+		Calendar calendar = Calendar.getInstance();
+		Date currentDate;
+		
+		newWeight = Integer.parseInt( screen(NEWWEIGHT) );
+		currentDate = currentDate().getTime();	
+		
+		Weight weights = new Weight();
+		weights.setDateWeight(currentDate);
+		weights.setIntWeight(newWeight);
+		user.addWeight(weights);
+		
+	}
 }
